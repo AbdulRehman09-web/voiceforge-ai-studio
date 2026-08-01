@@ -1,0 +1,50 @@
+services:
+  voice-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zenvyrolabs-voice-studio:latest
+    container_name: zenvyrolabs-voice-studio
+    ports:
+      - "7860:7860"
+    volumes:
+      # Bind mounts: if the container is removed/recreated, none of the
+      # user's saved character voices, RVC models, or preprocessed training
+      # data are lost.
+      - ./saved_voices:/app/saved_voices
+      - ./rvc_models:/app/rvc_models
+      - ./training_data:/app/training_data
+      # Named volume: cached HuggingFace/Whisper/F5-TTS model downloads
+      # (the ~2.4GB the README warns about) persist across rebuilds so you
+      # only pay that download cost once, not every `docker compose up --build`.
+      - hf_cache:/app/hf_cache
+    environment:
+      - RUNNING_IN_DOCKER=1
+      - GRADIO_SERVER_NAME=0.0.0.0
+      - GRADIO_SERVER_PORT=7860
+    restart: unless-stopped
+    # Fixes "Temporary failure in name resolution" when edge-tts tries to
+    # reach speech.platform.bing.com. Docker's default embedded DNS
+    # resolver occasionally fails to forward lookups correctly (common
+    # with some VPNs, corporate networks, or Docker Desktop networking
+    # quirks). Pointing the container straight at public resolvers avoids
+    # depending on the host's DNS forwarding working correctly.
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+
+    # ── Optional GPU support ──────────────────────────────────────────
+    # If you have an NVIDIA GPU + the NVIDIA Container Toolkit installed
+    # on the host, uncomment the block below to pass the GPU through to
+    # PyTorch/F5-TTS/RVC. Without it, everything still runs, just on CPU
+    # (fine for testing, slow for actually training/generating long clips).
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+volumes:
+  hf_cache:

@@ -1,0 +1,34 @@
+# Core UI
+gradio<7
+
+# Audio I/O / manipulation (requires the ffmpeg system binary — installed in Dockerfile)
+pydub>=0.25.1
+soundfile>=0.12.1
+
+# Config file for the F5-TTS CLI
+tomli_w>=1.0.0
+
+# NOTE: torch and torchaudio are intentionally NOT listed here. They're
+# installed together, from the same CPU-only wheel index, in the Dockerfile
+# BEFORE this file is processed. Installing them as a matched pair from one
+# index avoids an ABI mismatch between torch's and torchaudio's compiled
+# extensions (this is what caused "Could not load this library:
+# _torchaudio.abi3.so" — torchaudio was getting reinstalled from a
+# different build than torch during this step). A constraints file locks
+# both versions so nothing below can silently swap them out.
+transformers>=4.40
+numpy>=1.23.5,<1.24
+
+# Task 3: real noise-reduction for the training-audio pipeline
+noisereduce>=3.0.0
+
+# TTS engines used via CLI subprocess calls in app.py
+edge-tts>=6.1.0
+f5-tts>=0.6.2,<0.7.0
+
+# RVC voice-to-voice conversion (rvc_infer.py imports rvc_python)
+# NOTE: rvc-python incompatible with f5-tts; commented out for now
+# rvc-python>=0.1.4
+
+# Used by run_all.bat / optional character-audio fetching workflow
+yt-dlp>=2024.8.6

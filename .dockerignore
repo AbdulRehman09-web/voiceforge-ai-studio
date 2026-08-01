@@ -1,0 +1,12 @@
+venv/
+rvc_venv/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+temp/
+*.wav
+*.mp3
+hf_cache/
+.cache/
+training_data/
